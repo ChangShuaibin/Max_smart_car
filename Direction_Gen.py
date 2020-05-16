@@ -10,7 +10,11 @@ def next_direction(desired_direction, radar):
         if item[1]>50:
             blocking[i][0]=0
         else:
-            blocking[i][2]=abs(desired_direction-item[0])%180
+            tmp=abs(desired_direction-item[0])
+            if tem>180:
+                blocking[i][2]=tmp%180
+            else:
+                blocking[i][2]=tmp
     # find closest direction
     m = 360
     angle = 0
