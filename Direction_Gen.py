@@ -7,7 +7,7 @@ def next_direction(desired_direction, radar):
     for i, item in enumerate(radar):
         blocking[i][1]=item[0]
         blocking[i][2]=360
-        if item[1]>50:
+        if item[1]<50:
             blocking[i][0]=0
         else:
             tmp=abs(desired_direction-item[0])
