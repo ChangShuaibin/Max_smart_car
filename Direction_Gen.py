@@ -11,7 +11,7 @@ def next_direction(desired_direction, radar):
             blocking[i][0]=0
         else:
             tmp=abs(desired_direction-item[0])
-            if tem>180:
+            if tmp>180:
                 blocking[i][2]=tmp%180
             else:
                 blocking[i][2]=tmp
