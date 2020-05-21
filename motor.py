@@ -10,6 +10,7 @@ import time
 
 class motor():
     def __init__(self):
+        super().__init__()
         # define the pins connected to L293D
         self.RmotoRPin1 = 38
         self.RmotoRPin2 = 40
@@ -65,20 +66,22 @@ class motor():
     def destroy(self):
         GPIO.cleanup()
 
-    def angle2speed(self, angle):
+    def angle2speed(self, angle, forward):
         self.direction=self.direction+angle   #remember the initial direction
+        #self.motor(0,0)
+        #print('moving at', angle)
         if angle>0:
-            self.motor(-128,-90)
+            self.motor(-128*forward,-90*forward)
         else:
-            self.motor(-90, -128)
+            self.motor(-90*forward, -128*forward)
         time.sleep(abs(angle)/30)
-        self.motor(-128,-128)
+        self.motor(-128*forward,-128*forward)
 
-    def forward(self):
-        self.motor(-128,-128)
+    def forward(self, forward):
+        self.motor(-128*forward,-128*forward)
 
-    def backward(self):
-        self.motor(128, 128)
+    def backward(self,forward):
+        self.motor(-128*forward, -128*forward)
 
     def resume_direction(self):
         if self.direction>0:
@@ -98,5 +101,4 @@ if __name__ == '__main__':  # Program entrance
         m.forward()
     except KeyboardInterrupt:  # Press ctrl-c to end the program.
         m.destroy()
-    time.sleep(5)
     m.destroy()
