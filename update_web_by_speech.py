@@ -2,10 +2,9 @@ import speech_recognition as sr
 import threading
 from flask import Flask, render_template
 import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
-#for key in logging.Logger.manager.loggerDict:
-#    logging.getLogger(key).setLevel(logging.CRITICAL)
-#logging.getLogger().setLevel(logging.DEBUG)
 app = Flask(__name__)
 command=''
 index=0
@@ -13,57 +12,33 @@ r = sr.Recognizer()
 sr.Microphone.list_microphone_names()
 r.energy_threshold = 400
 r.dynamic_energy_threshold = 1
-r.dynamic_energy_ratio = 1.8
-motor_key_words=['turn left', 'turn right', 'forward','backward','stop']
-camera_key_words=['can you see', 'take a picture','take a video']
+r.dynamic_energy_ratio = 2
+motor_key_words=['turn left', 'turn right', 'forward','backward','stop', 'start']
+camera_key_words=['can you see', 'picture','video']
 
 def listen():
     global command
     global index
     while not 'exit' in command:
-        with sr.Microphone(0) as source:
-            print("listening period start")
-            try:
-                audio = r.listen(source, timeout=5, phrase_time_limit=3)
-                #print('listening period stop')
+         with sr.Microphone() as source:
                 try:
-                    key_word = r.recognize_google(audio)
-                    if 'hey Max' in key_word:
-                        print("Yes Sir!")
-                        text=Give_command(command)
-                        command=stadardize_command(text)
-                        index=index+1
+                    audio = r.listen(source, timeout=10, phrase_time_limit=4)
+                    text = r.recognize_google(audio)
+                    [command, index]= stadardize_command(text, index)
+                    print(command)
                 except:
-                    print('can not recognize command')
-            except sr.WaitTimeoutError:
-                print('time out')
+                    pass
 
-def Give_command(command):
-        with sr.Microphone() as source:
-            try:
-                # for testing purposes, we're just using the default API key
-                # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
-                # instead of `r.recognize_google(audio)`
-                audio = r.listen(source, timeout=5, phrase_time_limit=3)
-                #print('start processing command')
-                command = r.recognize_google(audio)
-            except sr.UnknownValueError:
-                pass
-                # print("Google Speech Recognition could not understand audio")
-            except sr.RequestError as e:
-                print("Could not request results from Google Speech Recognition service; {0}".format(e))
-        return (command)
-
-def stadardize_command(text):
+def stadardize_command(text, index):
     for item in motor_key_words:
         if item in text:
-            return 'motor '+item
+            return ['motor '+item, index+1]
     for item in camera_key_words:
         if item in text:
-            return 'camera '+ text
+            return ['camera '+ text,index+1]
     if 'exit' in text:
-        return 'exit'
-    return ''
+        return ['exit', index+1]
+    return ['missed that', index]
 
 @app.route("/")
 def hello():
