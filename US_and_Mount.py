@@ -27,6 +27,10 @@ class UltraSound():
         pingTime = self.pulseIn(self.echoPin, GPIO.HIGH, self.timeOut)  # read plus time of echoPin
         distance = pingTime * 340.0 / 2.0 / 10000.0  # calculate distance with sound speed 340m/s
         return distance
+    
+    def stop(self):
+        GPIO.output(self,trigPin, GPIO.LOW)
+        GPIO.output(self,echoPin, GPIO.LOW)
 
     def setup(self):
         GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
@@ -69,7 +73,8 @@ class SteppingMount():
     def motorStop(self):
         for i in range(0, 4, 1):
             GPIO.output(self.motorPins[i], GPIO.LOW)
-        GPIO.cleanup()
+        self.US.stop()
+        #GPIO.cleanup()
 
     def ClockWiseCycle(self):
             self.moveSteps(1, 3, 32)  # rotating 360 deg clockwise, a total of 2048 steps in a circle, 512 cycles
@@ -81,7 +86,7 @@ if __name__=='__main__':
     mount=SteppingMount([7,11,13,15])
     mount.setup()
     for i in range(16):
-        mount.ClockWiseCycle()
+        mount.CClockWiseCycle()
         distance=mount.US.getSonar()
         print('angle: ', i*22.5, 'distance: ', distance)
     GPIO.cleanup()

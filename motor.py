@@ -82,6 +82,12 @@ class motor():
 
     def backward(self,forward):
         self.motor(-128*forward, -128*forward)
+    
+    def stop(self):
+        self.motor(0,0)
+    
+    def start(self,forward):
+        self.motor(-128*forward, -128*forward)
 
     def resume_direction(self):
         if self.direction>0:
