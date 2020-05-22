@@ -9,7 +9,7 @@ from picamera import PiCamera
 from motor import motor
 from US_and_Mount import SteppingMount
 from Direction_Gen import next_direction
-from subprocess import call
+
 camera = PiCamera()
 app1 = Object_detect()
 m = motor()
@@ -23,11 +23,12 @@ start=0
 rotation=1
 command = ''
 
-def retrive_command():
+def retrive_command(IP):
     global command
     old_index = ''
     while 'exit' not in command:
-        r = requests.get('http://192.168.99.177/') #iphone or mac IP address
+        #r = requests.get('http://192.168.99.177/') #iphone or mac IP address
+        r = requests.get(IP) #cellular IP address
         text = r.text.split('<h1>')
         text = text[1]
         text = text.split('</h1>')
@@ -156,14 +157,45 @@ def my_radar():
 
 if __name__ == "__main__":
     from urllib.request import urlopen
+    from subprocess import call, check_output
     loop=1
     call(['espeak "hi hi   wait for wifi connection" 2>/dev/null'],shell=True)
+    print('check internet connection')
     while loop:
         try:
-            urlopen("http://192.168.99.177")
+            #urlopen("http://192.168.99.177")
+            urlopen("http://www.google.com")
             loop=0
         except:
             time.sleep(1)
+    #determin werb server IP address        
+    output=check_output(["iwlist","wlan0","scan"])
+    IP=''
+    for line in output.split():
+        if 'Nauge_iphone' in str(line):
+            IP='http://172.20.10.1/'
+            break
+    if IP=='':
+        for line in output.split():
+            if 'IconicBarbeque' in str(line):
+                IP='http://192.168.99.177'
+                break
+    if IP=='':
+        printf('not preconfig internet conntection')
+        call(['espeak "hi hi   not preconfig internet conntection" 2>/dev/null'],shell=True)
+        exit()
+    
+    print('waiting for web server')
+    call(['espeak "hi hi   waiting for web server" 2>/dev/null'],shell=True)
+    loop=1
+    while loop:
+        try:
+            #urlopen("http://192.168.99.177")
+            urlopen(IP)
+            loop=0
+        except:
+            time.sleep(1)
+    print('initiate')
     call(['espeak "hi hi   initiating max" 2>/dev/null'],shell=True)
     motor_thread = threading.Thread(target=my_motor, name='motor')
     camera_thread = threading.Thread(target=my_camera, name='camera')
@@ -172,7 +204,7 @@ if __name__ == "__main__":
     motor_thread.start()
     camera_thread.start()
     radar_thread.start()
-    retrive_command()
+    retrive_command(IP)
 
     motor_thread.join()
     camera_thread.join()
